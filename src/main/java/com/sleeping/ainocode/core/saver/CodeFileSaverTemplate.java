@@ -21,6 +21,13 @@ public abstract class CodeFileSaverTemplate<T> {
         return new File(baseDirPath);
     }
 
+    public final File saveCode(T result, Long appId) {
+        validateInput(result);
+        String baseDirPath = buildUniqueDir(appId);
+        saveFiles(result, baseDirPath);
+        return new File(baseDirPath);
+    }
+
     protected void validateInput(T result) {
         if (result == null) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "代码结果对象不能为空");
@@ -30,6 +37,17 @@ public abstract class CodeFileSaverTemplate<T> {
     protected final String buildUniqueDir() {
         String codeType = getCodeType().getValue();
         String uniqueDirName = StrUtil.format("{}_{}", codeType, IdUtil.getSnowflakeNextIdStr());
+        String dirPath = FILE_SAVE_ROOT_DIR + File.separator + uniqueDirName;
+        FileUtil.mkdir(dirPath);
+        return dirPath;
+    }
+
+    protected final String buildUniqueDir(Long appId) {
+        if (appId == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "应用 ID 不能为空");
+        }
+        String codeType = getCodeType().getValue();
+        String uniqueDirName = StrUtil.format("{}_{}", codeType, appId);
         String dirPath = FILE_SAVE_ROOT_DIR + File.separator + uniqueDirName;
         FileUtil.mkdir(dirPath);
         return dirPath;

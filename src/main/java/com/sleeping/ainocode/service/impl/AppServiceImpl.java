@@ -2,20 +2,24 @@ package com.sleeping.ainocode.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+import com.sleeping.ainocode.core.AiCodeGeneratorFacade;
 import com.sleeping.ainocode.exception.BusinessException;
 import com.sleeping.ainocode.exception.ErrorCode;
 import com.sleeping.ainocode.mapper.AppMapper;
 import com.sleeping.ainocode.model.dto.app.AppQueryRequest;
 import com.sleeping.ainocode.model.entity.App;
 import com.sleeping.ainocode.model.entity.User;
+import com.sleeping.ainocode.model.enums.CodeGenTypeEnum;
 import com.sleeping.ainocode.model.vo.AppVO;
 import com.sleeping.ainocode.model.vo.UserVO;
 import com.sleeping.ainocode.service.AppService;
 import com.sleeping.ainocode.service.UserService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +32,9 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private AiCodeGeneratorFacade aiCodeGeneratorFacade;
 
     @Override
     public AppVO getAppVO(App app) {
@@ -88,5 +95,31 @@ public class AppServiceImpl extends ServiceImpl<AppMapper, App> implements AppSe
                 .eq("priority", priority)
                 .eq("userId", userId)
                 .orderBy(sortField, "ascend".equals(sortOrder));
+    }
+
+    @Override
+    public Flux<String> chatToGenCode(Long appId, String message, User loginUser) {
+        if (appId == null || appId <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "应用 ID 无效");
+        }
+        if (StrUtil.isBlank(message)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "消息不能为空");
+        }
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        App app = this.getById(appId);
+        if (app == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "应用不存在");
+        }
+        if (!app.getUserId().equals(loginUser.getId())) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权访问该应用");
+        }
+        String codeGenTypeValue = app.getCodeGenType();
+        CodeGenTypeEnum codeGenTypeEnum = CodeGenTypeEnum.getEnumByValue(codeGenTypeValue);
+        if (codeGenTypeEnum == null) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "代码生成类型无效");
+        }
+        return aiCodeGeneratorFacade.generateAndSaveCodeStream(message, codeGenTypeEnum, appId);
     }
 }

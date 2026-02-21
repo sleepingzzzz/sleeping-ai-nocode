@@ -53,4 +53,23 @@ class AiCodeGeneratorFacadeTest {
         Assertions.assertFalse(completeContent.isEmpty());
         System.out.println("流式生成多文件完成，内容长度: " + completeContent.length());
     }
+
+    @Test
+    void generateAndSaveCodeWithAppId() {
+        File file = aiCodeGeneratorFacade.generateAndSaveCode("任务记录网站", CodeGenTypeEnum.MULTI_FILE, 1L);
+        Assertions.assertNotNull(file);
+        Assertions.assertTrue(file.exists());
+        System.out.println("基于 appId 的文件保存路径: " + file.getAbsolutePath());
+    }
+
+    @Test
+    void generateAndSaveCodeStreamWithAppId() {
+        Flux<String> codeStream = aiCodeGeneratorFacade.generateAndSaveCodeStream("任务记录网站", CodeGenTypeEnum.MULTI_FILE, 1L);
+        List<String> result = codeStream.collectList().block();
+        Assertions.assertNotNull(result);
+        String completeContent = String.join("", result);
+        Assertions.assertNotNull(completeContent);
+        Assertions.assertFalse(completeContent.isEmpty());
+        System.out.println("流式生成完成（带 appId），内容长度: " + completeContent.length());
+    }
 }
