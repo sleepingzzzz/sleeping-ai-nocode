@@ -17,21 +17,48 @@
   <a href="#贡献指南">贡献指南</a>
 </p>
 
+<p align="center">
+  <a href="https://github.com/sleepingzzzz/sleeping-ai-nocode/releases">
+    <img src="https://img.shields.io/github/v/release/sleepingzzzz/sleeping-ai-nocode?include_prereleases" alt="Version">
+  </a>
+  <a href="https://github.com/sleepingzzzz/sleeping-ai-nocode/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/sleepingzzzz/sleeping-ai-nocode" alt="License">
+  </a>
+</p>
+
 ---
 
 ## 功能特性
 
-### 用户管理
+### 🤖 AI 代码生成
+- **智能代码生成** - 基于 AI 的代码生成引擎
+  - HTML 单页应用生成
+  - 多文件项目生成
+  - 自定义 Prompt 模板支持
+- **代码解析系统** - 智能解析生成的代码
+  - HTML 代码解析器
+  - 多文件项目解析器
+- **文件保存系统** - 自动保存生成的代码文件
+  - 模板方法模式实现
+  - 支持自定义保存路径
+
+### 👤 用户管理
 - 用户注册与登录
 - 用户信息管理
 - 角色权限控制（用户/管理员）
 - 安全的密码加密存储
 
-### 安全特性
+### 🔒 安全特性
 - 速率限制 - 防止暴力破解攻击
 - 输入消毒 - 防止XSS攻击
 - 密码复杂度验证
 - 安全的会话管理
+
+### 🎨 响应式界面
+- 多断点响应式设计（xl, lg, md, sm, xs）
+- 移动端抽屉菜单
+- 统一的设计系统（Teal 主题色）
+- 流畅的过渡动画
 
 ### 验证规则
 | 字段 | 规则 |
@@ -50,7 +77,7 @@
 | Spring Boot | 3.5.4 | 核心框架 |
 | MyBatis-Flex | - | ORM框架 |
 | Sa-Token | - | 认证授权 |
-| Spring Security Crypto | - | 密码加密 |
+| Spring Security Crypto | 6.4.5 | 密码加密 |
 | MySQL | 8.0+ | 数据库 |
 
 ### 前端
@@ -131,7 +158,7 @@ npm run dev
 |------|------|
 | admin | Admin@123456 |
 
-> 请在生产环境中及时修改默认密码
+> ⚠️ 请在生产环境中及时修改默认密码
 
 ---
 
@@ -175,6 +202,24 @@ sleeping-ai-nocode/
 ├── src/                          # 后端源码
 │   └── main/
 │       ├── java/com/sleeping/ainocode/
+│       │   ├── ai/               # AI 代码生成
+│       │   │   ├── model/        # AI 模型
+│       │   │   │   ├── HtmlCodeResult.java
+│       │   │   │   └── MultiFileCodeResult.java
+│       │   │   ├── AiCodeGeneratorService.java
+│       │   │   └── AiCodeGeneratorServiceFactory.java
+│       │   ├── core/             # 核心功能
+│       │   │   ├── parser/       # 代码解析器
+│       │   │   │   ├── CodeParser.java
+│       │   │   │   ├── CodeParserExecutor.java
+│       │   │   │   ├── HtmlCodeParser.java
+│       │   │   │   └── MultiFileCodeParser.java
+│       │   │   ├── saver/        # 文件保存器
+│       │   │   │   ├── CodeFileSaverExecutor.java
+│       │   │   │   ├── CodeFileSaverTemplate.java
+│       │   │   │   ├── HtmlCodeFileSaverTemplate.java
+│       │   │   │   └── MultiFileCodeFileSaverTemplate.java
+│       │   │   └── AiCodeGeneratorFacade.java
 │       │   ├── annotation/       # 自定义注解
 │       │   ├── aop/              # AOP切面
 │       │   ├── common/           # 公共类
@@ -190,6 +235,9 @@ sleeping-ai-nocode/
 │       │   │   └── vo/           # 视图对象
 │       │   └── service/          # 服务层
 │       └── resources/
+│           ├── prompt/           # AI Prompt 模板
+│           │   ├── codegen-html-system-prompt.txt
+│           │   └── codegen-multi-file-system-prompt.txt
 │           └── application.yml   # 配置文件
 ├── sleeping-ai-nocode-frontend/  # 前端项目
 │   ├── src/
@@ -201,8 +249,10 @@ sleeping-ai-nocode/
 │   │   ├── router/               # 路由
 │   │   ├── stores/               # 状态管理
 │   │   └── styles/               # 样式
+│   │       └── variables.css     # CSS 变量（设计系统）
 │   └── package.json
-└── README.md
+├── CHANGELOG.md                  # 变更日志
+└── README.md                     # 项目说明
 ```
 
 ---
@@ -258,6 +308,17 @@ public BaseResponse<Void> doAction() {
 }
 ```
 
+#### 使用 AI 代码生成
+```java
+@Autowired
+private AiCodeGeneratorFacade facade;
+
+public void generateCode(String prompt) {
+    MultiFileCodeResult result = facade.generateMultiFileCode(prompt);
+    // 处理生成结果
+}
+```
+
 ### 前端开发
 
 #### 添加新页面
@@ -273,6 +334,40 @@ if (res.data.code === 0) {
     console.log(res.data.data)
 }
 ```
+
+#### 使用设计系统变量
+```css
+.custom-component {
+  color: var(--color-primary);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+}
+```
+
+---
+
+## 设计系统
+
+### 颜色
+| 变量 | 值 | 用途 |
+|------|-----|------|
+| `--color-primary` | #0d9488 | 主色调 |
+| `--color-primary-light` | #14b8a6 | 主色调浅色 |
+| `--color-primary-dark` | #0f766e | 主色调深色 |
+| `--color-accent` | #8b5cf6 | 强调色 |
+| `--color-success` | #22c55e | 成功 |
+| `--color-warning` | #eab308 | 警告 |
+| `--color-error` | #ef4444 | 错误 |
+
+### 响应式断点
+| 断点 | 宽度 | 说明 |
+|------|------|------|
+| xl | ≥1200px | 大屏幕 |
+| lg | 992-1199px | 中等屏幕 |
+| md | 768-991px | 平板 |
+| sm | 576-767px | 大手机 |
+| xs | <576px | 小手机 |
 
 ---
 
@@ -299,6 +394,12 @@ if (res.data.code === 0) {
 3. 提交更改 (`git commit -m 'feat: add amazing feature'`)
 4. 推送到分支 (`git push origin feature/amazing-feature`)
 5. 创建 Pull Request
+
+---
+
+## 更新日志
+
+查看 [CHANGELOG.md](CHANGELOG.md) 了解详细的版本更新记录。
 
 ---
 

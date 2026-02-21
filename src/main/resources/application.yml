@@ -1,6 +1,8 @@
 spring:
   application:
     name: sleeping-ai-nocode
+  profiles:
+    active: local
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/sleeping_ai_nocode

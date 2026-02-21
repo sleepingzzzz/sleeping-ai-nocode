@@ -48,6 +48,10 @@ pnpm-debug.log*
 lerna-debug.log*
 
 Editor directories and files
+
+CUSTOM
+application-local.yml
+tmp/
 .vscode
 *.suo
 *.ntvs*
